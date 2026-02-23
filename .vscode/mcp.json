@@ -1,0 +1,20 @@
+{
+  "servers": {
+    "unrealMCP": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/Users/vectrino/Documents/Repositories/Vectrino/unreal-mcp/Python",
+        "run",
+        "unreal_mcp_server.py",
+        "--transport",
+        "stdio",
+        "--unreal-host",
+        "127.0.0.1",
+        "--unreal-port",
+        "55557"
+      ]
+    }
+  }
+}

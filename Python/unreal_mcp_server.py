@@ -4,7 +4,9 @@ Unreal Engine MCP Server
 A simple MCP server for interacting with Unreal Engine.
 """
 
+import argparse
 import logging
+import os
 import socket
 import sys
 import json
@@ -24,8 +26,13 @@ logging.basicConfig(
 logger = logging.getLogger("UnrealMCP")
 
 # Configuration
-UNREAL_HOST = "127.0.0.1"
-UNREAL_PORT = 55557
+UNREAL_HOST = os.getenv("UNREAL_MCP_HOST", "127.0.0.1")
+_env_port = os.getenv("UNREAL_MCP_PORT", "55557")
+try:
+    UNREAL_PORT = int(_env_port)
+except ValueError:
+    UNREAL_PORT = 55557
+    logger.warning("Invalid UNREAL_MCP_PORT='%s'; using default 55557", _env_port)
 
 class UnrealConnection:
     """Connection to an Unreal Engine instance."""
@@ -371,7 +378,41 @@ def info():
     - Clean up resources on errors
     """
 
+def parse_runtime_args() -> argparse.Namespace:
+    """Parse runtime arguments for MCP server startup."""
+    parser = argparse.ArgumentParser(description="Run the Unreal MCP server.")
+    parser.add_argument(
+        "--unreal-host",
+        default=UNREAL_HOST,
+        help="Unreal bridge host (default: env UNREAL_MCP_HOST or 127.0.0.1)",
+    )
+    parser.add_argument(
+        "--unreal-port",
+        type=int,
+        default=UNREAL_PORT,
+        help="Unreal bridge port (default: env UNREAL_MCP_PORT or 55557)",
+    )
+    parser.add_argument(
+        "--transport",
+        default="stdio",
+        help="MCP transport to use. VS Code requires stdio.",
+    )
+    return parser.parse_args()
+
 # Run the server
 if __name__ == "__main__":
-    logger.info("Starting MCP server with stdio transport")
-    mcp.run(transport='stdio') 
+    args = parse_runtime_args()
+    UNREAL_HOST = args.unreal_host
+    UNREAL_PORT = args.unreal_port
+
+    if args.transport != "stdio":
+        logger.error("Unsupported transport '%s'. Only stdio is supported.", args.transport)
+        raise SystemExit("Unsupported transport. Use --transport stdio")
+
+    logger.info(
+        "Starting MCP server with %s transport, Unreal target %s:%s",
+        args.transport,
+        UNREAL_HOST,
+        UNREAL_PORT,
+    )
+    mcp.run(transport=args.transport)

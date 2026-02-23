@@ -10,7 +10,7 @@
 
 </div>
 
-This project enables AI assistant clients like Cursor, Windsurf and Claude Desktop to control Unreal Engine through natural language using the Model Context Protocol (MCP).
+This project enables AI assistant clients like Cursor, VS Code, Windsurf and Claude Desktop to control Unreal Engine through natural language using the Model Context Protocol (MCP).
 
 ## ⚠️ Experimental Status
 
@@ -133,18 +133,42 @@ Use the following JSON for your mcp configuration based on your MCP client.
 
 An example is found in `mcp.json`
 
+### VS Code Configuration
+
+VS Code MCP uses the `servers` key (not `mcpServers`) and `type: "stdio"`:
+
+```json
+{
+  "servers": {
+    "unrealMCP": {
+      "type": "stdio",
+      "command": "uv",
+      "args": [
+        "--directory",
+        "<path/to/the/folder/PYTHON>",
+        "run",
+        "unreal_mcp_server.py",
+        "--transport",
+        "stdio"
+      ]
+    }
+  }
+}
+```
+
 ### MCP Configuration Locations
 
 Depending on which MCP client you're using, the configuration file location will differ:
 
 | MCP Client | Configuration File Location | Notes |
 |------------|------------------------------|-------|
+| VS Code | `.vscode/mcp.json` | Workspace-level config |
 | Claude Desktop | `~/.config/claude-desktop/mcp.json` | On Windows: `%USERPROFILE%\.config\claude-desktop\mcp.json` |
 | Cursor | `.cursor/mcp.json` | Located in your project root directory |
 | Windsurf | `~/.config/windsurf/mcp.json` | On Windows: `%USERPROFILE%\.config\windsurf\mcp.json` |
 
-Each client uses the same JSON format as shown in the example above. 
-Simply place the configuration in the appropriate location for your MCP client.
+Cursor, Claude Desktop, and Windsurf use the `mcpServers` format shown above.
+VS Code uses the `servers` format shown in the VS Code section.
 
 
 ## License
